@@ -1,0 +1,325 @@
+% \usepackage{amsmath,amsthm,amsfonts,amssymb}
+% \usepackage{fullpage}
+% \usepackage[usenames]{xcolor}
+
+% \theoremstyle{plain}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{claim}{Claim}
+% \newtheorem{corollary}{Corollary}
+% \newtheorem{proposition}{Proposition}
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}
+% \newtheorem{exercise}{Exercise}
+% \newtheorem{problem}{Problem}
+% \newtheorem{challenge}{Challenge Problem}
+% \newtheorem{open}{Open Problem}
+% \theoremstyle{plain}
+
+% \newcommand{\argmin}{\mathrm{argmin}}
+% \newcommand{\calX}{\mathcal{X}}
+% \newcommand{\calY}{\mathcal{Y}}
+% \newcommand{\calZ}{\mathcal{Z}}
+% \newcommand{\cost}{\mathrm{cost}}
+% \newcommand{\disc}{\mathrm{disc}}
+% \newcommand{\discu}{\mathrm{disc_u}}
+% \newcommand{\Disj}{\textsc{Disj}}
+% \newcommand{\Eq}{\textsc{Eq}}
+% \newcommand{\GT}{\textsc{GT}}
+% \newcommand{\IP}{\textsc{IP}}
+% \newcommand{\R}{\mathbb{R}}
+% \newcommand{\rank}{\mathrm{rank}}
+% \newcommand{\replacethistext}[1]{\textcolor{red}{#1}}
+% \newcommand{\bn}{\{0, 1\}^n}
+% \newcommand{\bs}{\{0, 1\}}
+
+% \newcommand{\exercises}{\bigskip \noindent\rule{8cm}{0.4pt} \medskip}
+
+
+
+% \title{Communication complexity: Chapter 2 \\ More lower bound techniques}
+% \author{Eric Blais and (YOUR NAME HERE)}
+
+% \begin{document}
+
+% \maketitle
+\chapter[More lower bound techniques]{More lower bound techniques}
+In the first chapter, we introduced the deterministic communication complexity 
+model and saw the general \emph{partition bound} method for proving communication complexity lower bounds. While the partition bound is quite strong, it is hard to work with directly. The goal of this chapter is to introduce other general methods for proving communication complexity lower bounds more easily: the \emph{fooling set bound}, the \emph{rectangle size bound}, and the \emph{log rank bound}.
+
+
+
+\newpage \section{Fooling set bound}
+
+For many functions, the \emph{fooling set} bound is the easiest way to get meaningful communication complexity lower bounds.
+
+\begin{definition}[Fooling set]
+A set $F \subseteq \calX \times \calY$ is a \emph{fooling set} for the function $f : \calX \times \calY \to \{0,1\}$ if there is a value $b \in \{0,1\}$ such that
+\begin{enumerate}
+\item For every $(x,y) \in F$, $f(x,y) = b$; and
+\item For every $(x,y) \neq (x',y') \in F$, we have $f(x,y') \neq b$ or $f(x',y) \neq b$ (or both).
+\end{enumerate}
+\end{definition}
+
+\begin{lemma}
+If $f : \mathcal{X} \times \mathcal{Y} \to \{0,1\}$ has a fooling set of size $t$ then $\chi(f) \ge t$ and $D(f) \ge \log_2 t$.
+\end{lemma}
+
+\begin{proof}
+Fix any $(x, y) \in F$, for any other $(x',y') \in F$ such that $(x,y) \neq (x',y')$, the rectangle $R$ that contains both $(x,y)$ and $(x',y')$ cannot be $f$-monochromatic because $f(x,y') \neq f(x, y)$ or $f(x',y) \neq f(x,y)$ (or both). (These two points are in the rectangle containing $(x,y)$ and $(x',y')$ as per definition of rectangles.)* Hence the number of $f$-monochromatic rectangles required to cover the matrix is as least $t$. 
+\end{proof}
+
+
+\newpage \section{Equality II}
+
+Using the fooling set bound, we can get an optimal lower bound on the communication complexity of the equality function.
+
+\begin{claim}
+The set $S$ = $\{(x, x): x \in \{0, 1\}^n \}$ is a fooling set for \Eq
+\end{claim}
+
+To proof a set F is a fooling set for function $f$, we need to prove:
+\begin{enumerate}
+\item For every $(x,y) \in F$, $f(x,y) = b$; and
+\item For every $(x,y)≠(x′,y′)∈F$, we have $f(x,y′)≠b$ or $f(x′,y)≠b$ (or both).
+\end{enumerate}
+\begin{proof}
+\begin{enumerate}
+\item Every $f(x,x) = 1, \forall (x, x) \in S$ 
+\item For every $(x,x)≠(x′,x′) \in S$, we have $f(x,x′) = f(x′,x) = 0$.
+\end{enumerate}
+Hence the set S is a fooling set for \Eq
+\end{proof}
+
+\begin{theorem}
+$D(\Eq) \ge n$.
+\end{theorem}
+
+\begin{proof}
+The set $S$ in claim 1 has size $2^n$ as there are $2^n$ elements in $\{0, 1\}^n$ . From Lemma 1, we have $D(\Eq) \ge log (2^n) = n$
+\end{proof}
+
+\exercises
+
+\begin{exercise}
+Prove that in fact $D(\Eq) = n+1$.
+\end{exercise}
+The only thing I can think of here is to pick $n = 1$, and $D(\Eq) < n + 1 = 2$  means that either Alice or Bob has to give answer immediately, which is impossible. So to generalize, proof by contradiction will work. 
+
+You will need at least one extra rectangle to cover the 0's, and the partition number is always integer. 
+
+\newpage \section{Set disjointness}
+
+The \emph{set disjointness} function $\Disj : 2^{[n]} \times 2^{[n]}$ is defined by
+\[
+\Disj(S,T) = \begin{cases}
+1 & \mbox{if } S \cap T = \emptyset \\
+0 & \mbox{if } S \cap T \neq \emptyset.
+\end{cases}
+\]
+Use the fooling set method to obtain optimal bounds on the communication complexity of the set disjointness function.
+
+\begin{theorem}
+$D(\Disj) = \Theta(n)$.
+\end{theorem}
+
+\begin{proof}
+The set $\{ (x, 2^{[n]}\setminus x): x\in  2^{[n]}\}$  is a fooling set of size $2^n$, as $\Disj(x, 2^{[n]}\setminus x)$ is always 1, but $\Disj(x, x)$ is always 0. The rest follows from fooling set bound.
+\end{proof}
+
+
+
+\newpage \section{Inner product (Bonus)}
+
+The fooling set bound is not always tight. One particularly noteworthy example where this method fails to give a good lower bound is the inner product function  $\IP : \{0,1\}^n \times \{0,1\}^n \to \{0,1\}$ defined by
+\[
+\IP(x,y) = \sum_{i=1}^n x_i y_i \pmod{2}.
+\]
+As we will see later, $D(\IP) = \Theta(n)$, but the fooling set bound can only give the much weaker bound of $D(\IP) = \Omega(\log n)$.
+
+\begin{theorem}
+Every fooling set for the $\IP$ function has size at most $n^2$.
+\end{theorem}
+
+\begin{proof}
+\replacethistext{Enter your proof here, if you complete it.}
+\end{proof}
+
+
+
+\newpage \section{Special case of the rectangle size bound}
+
+The partition bound says that the communication complexity of $f : \calX \times \calY \to \{0,1\}$ is large if the minimum number of $f$-chromatic rectangles required to partition $\calX \times \calY$ is large. And the number of $f$-chromatic rectangles required to partition $\calX \times \calY$ must be large whenever the only $f$-chromatic rectangles are small. This observation is the core of the \emph{rectangle size bound}.
+
+\begin{definition}[$m(f)$]
+For a given function $f : \calX \times \calY \to \{0,1\}$, define the \emph{maximum rectangle size} of $f$ to be
+\[
+m(f) = \max \{ |R| : R \subseteq \calX \times \calY \mbox{ is an $f$-monochromatic rectangle} \}.
+\]
+\end{definition}
+
+
+\begin{lemma}
+For every function $f : \calX \times \calY \to \{0,1\}$, $\chi(f) \ge \frac{|\calX| \, |\calY|}{m(f)}$ and therefore
+\[
+D(f) \ge \log_2 \frac{|\calX| \, |\calY|}{m(f)}.
+\]
+\end{lemma}
+
+\begin{proof}
+There are $|\calX| \, |\calY|$ entries in the matrix of $f$. When the largest $f$-monochromatic rectangle has size $m(f)$, it requires at least $\frac{|\calX| \, |\calY|}{m(f)}$ rectangles to cover every entry. Hence the partition number is at least $\frac{|\calX| \, |\calY|}{m(f)}$. The rest follows from partition bound. 
+
+$|x||y| = \sum_{i \le \chi(f)} |R_i| \le \sum_{i \le \chi(f)} m(f)$
+\end{proof}
+
+
+
+\newpage \section{Inner product II (Bonus)}
+
+Use the rectangle size bound to prove an optimal lower bound on the inner product function.
+
+\begin{theorem}
+$m(IP) \le 2^{n}$ and so $D(IP) = \Theta(n)$.
+\end{theorem}
+
+\begin{proof}
+idea: Let $R$ be a 0-rectangle of maximal size, $R = A \times B \subseteq X \times Y$
+claim: $A$ and $B$ are orthogonal subspaces of $Z_2^n$
+dim($A$) $+$ dim($B$) $\le$ n (from linear algebra)
+$2^{dim(A) + dim(B)} = |A|\, |B| \le 2^n$
+\end{proof}
+
+
+\newpage \section{Rectangle size bound}
+
+The (general) rectangle size bound is obtained by generalizing the observation from the last section: instead of just counting the number of elements in a rectangle, we can consider the measure of rectangles under \emph{any} probability distribution on $\calX \times \calY$.
+
+\begin{definition}[$m_\mu(f)$]
+For a given function $f : \calX \times \calY \to \{0,1\}$ and a given distribution $\mu$ on $\calX \times \calY$, define the \emph{maximum rectangle size of $f$ with respect to $\mu$} to be
+\[
+m_\mu(f) = \max \{ \mu(R) : R \subseteq \calX \times \calY \mbox{ is an $f$-monochromatic rectangle} \}.
+\]
+\end{definition}
+
+
+\begin{lemma}
+For every function $f : \calX \times \calY \to \{0,1\}$ and every distribution $\mu$ on $\calX \times \calY$, 
+\[
+\chi(f) \ge \frac1{m_\mu(f)}
+\]
+and therefore
+\[
+D(f) \ge \log_2 \frac{1}{m_\mu(f)}.
+\]
+\end{lemma}
+
+\begin{proof}
+The proof is similar to previous lemma, but replace the size measure with probability measure. The entire probability space (the matrix) has mass 1, it takes at least $\frac1{m_\mu(f)}$ many rectangles to cover the entire matrix, as $m_\mu(f)$ is the $f$-monochromatic rectangle of maximum mass. Hence the partition number is at least $\frac1{m_\mu(f)}$ . The rest follows from partition bound.
+\end{proof}
+
+
+\newpage \section{Fooling sets and rectangle size bound}
+
+The fooling set bound is a special case of the rectangle size bound, as the following theorem shows.
+
+\begin{theorem}
+If $f : \calX \times \calY \to \{0,1\}$ has a fooling set $S \subseteq \calX \times \calY$ of size $|S| = t$, then there is a distribution $\mu$ on $\calX \times \calY$ for which $m_\mu(f) \le 1/t$.
+\end{theorem}
+
+\begin{proof}
+Uniform distribution over the fooling set.  
+\end{proof}
+
+
+\newpage \section{Log rank bound}
+
+Another convenient measure that lower bounds the partition number of a function is the log of the rank of the corresponding matrix.
+
+\begin{definition}[Matrix of a function]
+The \emph{matrix} $M_f$ corresponding to the function $f : \calX \times \calY \to \{0,1\}$ is the $|\calX| \times |\calY|$-dimensional $\{0,1\}$-valued matrix with rows indexed by $\calX$ and columns indexed by $\calY$ defined by
+\[
+(M_f)_{x,y} = f(x,y)
+\]
+for every $x \in \calX$ and $y \in \calY$.
+\end{definition}
+
+\begin{definition}[Rank]
+The \emph{rank} of the function $f$, denoted
+\[
+\rank(f),
+\] 
+is the linear rank of the matrix $M_f$ over $\R$.
+\end{definition}
+
+The logarithm of the rank of a function gives a lower bound on the communication complexity of the function.
+
+\begin{lemma}
+\label{lem:logrank}
+For every $f : \calX \times \calY \to \{0,1\}$,
+\[
+D(f) \ge \log_2 \rank(f).
+\]
+\end{lemma}
+
+\begin{proof}
+Take the minimum partition of the matrix, Since all $f$-monochromatic rectangles are either all 0's or all 1's matrix. If a matrix is all 0's, it does not contribute anything to the total rank. If it is all 1's, it contribute 1 to the total rank. Hence the total rank is at most the partition number. The rest follows from partition bound. 
+\end{proof}
+
+\exercises
+
+\begin{exercise} %[Easy]
+Give an alternative proof that $D(\Eq) \ge n$ using the log rank bound.
+\end{exercise}
+
+\begin{exercise}
+Give an alternative proof that $D(\IP) \ge n$ using the log rank bound.\end{exercise}
+
+
+\newpage \section{Greater than}
+
+The greater-than function $\GT : [2^n] \times [2^n] \to \{0,1\}$ is defined by
+\[
+\GT(x,y) = \begin{cases}
+1 & \mbox{if } x > y \\
+0 & \mbox{otherwise.}
+\end{cases}
+\]
+Use the log rank bound to give an optimal lower bound on the greater-than function.
+
+\begin{theorem}
+$D(\GT) = \Theta(n)$.
+\end{theorem}
+
+\begin{proof}
+The matrix of GT is a lower diagonal matrix, the rank of it is $2^n - 1$. Hence by log rank bound, $D(\GT) = \Theta(n)$.
+\end{proof}
+
+
+
+\newpage \section{Tightness of the log rank bound}
+
+Prove that the rank of a function can also be used to obtain an upper bound on the communication complexity of the function.
+
+\begin{theorem}
+For every $f : \calX \times \calY \to \{0,1\}$, $D(f) \le \rank(f) + 1$.
+\end{theorem}
+
+\begin{proof}
+send the coefficients of the linear combination or send bits in the row intercept basis column. 
+\end{proof}
+
+\exercises
+
+\begin{exercise} %[Hard]
+Show that there exists a function $f$ for which $D(f) = \omega( \log_2 \rank(f) )$.
+\end{exercise}
+
+\begin{open}[Log rank conjecture]
+Prove that there exists a constant $c > 0$ such that every function $f$ satisfies
+\[
+D(f) = O( \log^c \rank(f)).
+\]
+\end{open}
+
+
+% \end{document}
